@@ -1,0 +1,21 @@
+{
+  "name": "x402-bazaar-explorer",
+  "version": "1.0.0",
+  "private": false,
+  "description": "A daily snapshot and browsable explorer of every service listed in the Coinbase CDP x402 Bazaar discovery registry.",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "fetch": "node scripts/fetch.mjs",
+    "transform": "node scripts/transform.mjs",
+    "assemble": "node scripts/build.mjs",
+    "build": "npm run fetch && npm run transform && npm run assemble",
+    "build:offline": "npm run transform && npm run assemble",
+    "test": "node scripts/smoke.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.5"
+  }
+}

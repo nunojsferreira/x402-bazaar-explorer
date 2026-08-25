@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # A PR build hits the live registry too, so a breaking upstream change
+      # shows up here rather than in tomorrow's scheduled deploy.
+      - run: npm run build
+
+      - run: npm test

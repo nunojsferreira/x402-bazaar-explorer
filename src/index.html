@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402 Bazaar Explorer</title>
+<meta name="description" content="Browse every service listed in the Coinbase CDP x402 Bazaar discovery registry: price, settlement rails and real 30-day demand. Rebuilt daily.">
+<link rel="canonical" href="__SITE_URL__/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="x402 Bazaar Explorer">
+<meta property="og:description" content="Every service in the x402 Bazaar discovery registry, with price, settlement rails and real 30-day demand. Rebuilt daily.">
+<meta property="og:url" content="__SITE_URL__/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#F5F6F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0F14" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css?v=__BUILD_ID__">
+<link rel="preload" as="fetch" href="data/registry.json?v=__BUILD_ID__" crossorigin>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <button class="iconbtn" id="railtoggle" aria-label="Show filters" style="display:none">☰</button>
+      <h1>x402 Bazaar</h1>
+      <span class="sub" id="stamp">loading snapshot…</span>
+    </div>
+    <div class="search" role="search">
+      <span class="ico" aria-hidden="true">⌕</span>
+      <label class="sr-only" for="q" hidden>Search the registry</label>
+      <input id="q" type="search" placeholder="Search endpoints, hosts, descriptions, tags…" autocomplete="off" spellcheck="false" disabled>
+      <button class="clear" id="qclear" aria-label="Clear search" hidden>✕</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <button class="iconbtn" id="theme" aria-label="Toggle light and dark theme" title="Toggle theme">◐</button>
+  </header>
+
+  <div class="workspace">
+    <aside class="rail" id="rail" aria-label="Filters">
+      <div class="group">
+        <h3>Sort <button class="linkbtn" id="reset" type="button">Reset all</button></h3>
+        <select class="select" id="sort" aria-label="Sort listings">
+          <option value="calls">30d calls — high to low</option>
+          <option value="payers">30d unique payers — high to low</option>
+          <option value="priceasc">Price — low to high</option>
+          <option value="pricedesc">Price — high to low</option>
+          <option value="recent">Last called — most recent</option>
+          <option value="host">Host — A to Z</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h3>Demand</h3>
+        <div class="seg" id="demand"></div>
+      </div>
+
+      <div class="group">
+        <h3>Category</h3>
+        <div class="chips" id="cats"></div>
+      </div>
+
+      <div class="group">
+        <h3>Settlement network</h3>
+        <div class="chips" id="nets"></div>
+        <button class="more" id="netsmore" type="button" hidden></button>
+      </div>
+
+      <div class="group">
+        <h3>Scheme</h3>
+        <div class="chips" id="schemes"></div>
+      </div>
+
+      <div class="group">
+        <h3>Price per call</h3>
+        <div class="chips" id="price"></div>
+      </div>
+
+      <div class="group">
+        <h3>Flags</h3>
+        <label class="switch"><span>Curated by CDP</span><input type="checkbox" id="fcurated"></label>
+        <label class="switch"><span>Documented response example</span><input type="checkbox" id="fexample"></label>
+        <label class="switch"><span>Called in last 7 days</span><input type="checkbox" id="ffresh"></label>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="listhead">
+        <div>Endpoint</div>
+        <div class="r">Price</div>
+        <div class="r">30d calls</div>
+        <div class="r c-payers">Unique payers</div>
+      </div>
+
+      <div class="scroller" id="scroller">
+        <div class="spacer" id="spacer"></div>
+        <div class="skeleton" id="skeleton">
+          <div class="sk"><div class="bar" style="width:38%"></div><div class="bar" style="width:64%"></div></div>
+          <div class="sk"><div class="bar" style="width:30%"></div><div class="bar" style="width:55%"></div></div>
+          <div class="sk"><div class="bar" style="width:44%"></div><div class="bar" style="width:70%"></div></div>
+          <div class="sk"><div class="bar" style="width:26%"></div><div class="bar" style="width:48%"></div></div>
+          <div class="sk"><div class="bar" style="width:36%"></div><div class="bar" style="width:60%"></div></div>
+          <div class="sk"><div class="bar" style="width:32%"></div><div class="bar" style="width:52%"></div></div>
+        </div>
+        <div class="state" id="empty" hidden>
+          <div class="disp">No endpoints match</div>
+          <div>Loosen a filter or clear the search.</div>
+        </div>
+        <div class="state" id="failed" hidden>
+          <div class="disp">Snapshot failed to load</div>
+          <div id="failmsg">Reload the page. If it keeps failing, the daily build may be mid-deploy.</div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <span id="footl">Loading the daily snapshot…</span>
+        <span>
+          <button class="linkbtn sm" id="csv" type="button" disabled>Export filtered CSV</button>
+          <span class="mono" id="footr"></span>
+        </span>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Endpoint detail">
+  <div class="dhead">
+    <div style="min-width:0;flex:1">
+      <h2 id="dtitle">—</h2>
+      <div class="host" id="dhost"></div>
+    </div>
+    <button class="iconbtn" id="dclose" type="button" aria-label="Close detail">✕</button>
+  </div>
+  <div class="dbody" id="dbody"></div>
+</aside>
+
+<script src="app.js?v=__BUILD_ID__"></script>
+</body>
+</html>
