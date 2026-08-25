@@ -8,7 +8,7 @@ paginated JSON API with no filtering, no aggregates and no history. This project
 pulls the whole thing once a day, classifies it, and serves it as a single
 static page you can search, filter and export.
 
-**Live site:** _set `vars.SITE_URL` and enable Pages, then link it here._
+**Live site:** https://nunojsferreira.github.io/x402-bazaar-explorer
 
 ---
 

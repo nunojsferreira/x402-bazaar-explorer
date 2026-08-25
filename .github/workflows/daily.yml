@@ -26,9 +26,9 @@ jobs:
     outputs:
       listings: ${{ steps.summary.outputs.listings }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -72,9 +72,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/history
           git commit -m "chore(data): snapshot $(node -p "require('./dist/data/meta.json').day")"
-          git push
+          # A manual run can overlap the cron or a push, so the ref may have
+          # moved under us. Rebase and retry rather than failing the deploy.
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "push rejected (attempt $attempt), rebasing on origin/main"
+            git pull --rebase --autostash origin main || exit 1
+          done
+          echo "could not push the history point after 3 attempts"
+          exit 1
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -86,4 +94,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
