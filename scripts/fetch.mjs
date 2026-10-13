@@ -27,7 +27,13 @@ let resumeAt = 0;
 
 // Re-check after each sleep: another worker's 429 may have pushed the deadline out.
 async function waitForSharedPause() {
-  while (resumeAt > Date.now()) await sleep(resumeAt - Date.now());
+  let waited = false;
+  while (resumeAt > Date.now()) {
+    waited = true;
+    await sleep(resumeAt - Date.now());
+  }
+  // Workers parked here all wake together; spread them so we don't resume as one burst.
+  if (waited) await sleep(jitterMs());
 }
 
 async function getPage(offset) {

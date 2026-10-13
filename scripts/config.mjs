@@ -2,7 +2,7 @@
 
 export const API = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources";
 export const PAGE_SIZE = 100;
-export const CONCURRENCY = 8;
+export const CONCURRENCY = 4;
 export const RETRIES = 7;
 export const BACKOFF_CAP_MS = 30_000;
 // A Retry-After longer than this fails the run rather than retrying early.
